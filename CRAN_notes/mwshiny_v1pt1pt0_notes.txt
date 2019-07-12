@@ -1,0 +1,11 @@
+## Test environments
+* local Windows 10 install, R 3.5.1
+
+## R CMD check results
+There were no ERRORs, WARNINGs, or NOTEs.
+
+## Resubmission
+This is a version update (1.1.0). In this version, I have:
+- updated both the serv_out and serv_calc functions to be of the form function(calc, sess), where sess is the traditional Shiny session variable.
+- added more safeguards regarding spaces in window names and nonunique window names
+- updated and added some clarifications to vignettes accordingly

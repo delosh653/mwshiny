@@ -1,0 +1,15 @@
+## Test environments
+* local Windows 10 install, R 3.5.1
+
+## R CMD check results
+There were no ERRORs, WARNINGs, or NOTEs.
+
+## Resubmission
+This is a version update (1.0.0). In this version, I have:
+- updated mwsApp() to accept dependencies from imported packages that are heavily dependent on CSS and JS files
+- added a vignette explaining this functionality
+- updated mwshiny vignette to reflect changes
+- updated the required functions for the serv_calc and serv_out lists to only require one parameter
+  - this parameter, calc, now includes both traditional shiny input and any calculated values derived from input
+- all body tags in submitted page HTML will be changed to div, with a warning; submitted html tags throw an error
+- added a required import, and several suggested imports
