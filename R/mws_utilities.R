@@ -29,91 +29,58 @@ serverFunct <- function(serverValues, session, output, serv_out_list){
 #'
 #' @param win_titles vector of uniquely named strings, corresponding to window titles. Must be same length as ui_win, and titles must be same index as corresponding ui page in ui_win. No windows can be named 'WindowSelector', and titles cannot have spaces.
 #' @param ui_list list of shiny ui pages. Must be same length as win_titles, and ui page must be same index as corresponding title in win_titles.
-#' @param depend named list of package dependencies, with the names corresponding to the packages for which .js and .css files will be imported. If value is NA, all .js and .css files will be imported. Otherwise, value must be a vector of strings corresponding to the .js and .css files to be imported, with location relative to the package folder.
+#' @param depend deprecated; previously was a way to declare HTML dependencies, but now they are inferred from elements of \code{ui_list}.
 #' @return ui: user interfaces for all windows
-mwsUI <- function(win_titles, ui_list, depend) {
-  win_select <- ""
-  for (w in win_titles){
-    # check if titles have spaces
-    if (grepl(" ", w)){
-      stop(paste("Window titles cannot have spaces. Please remove space in window title:", w))
+mwsUI <- function(win_titles, ui_list, depend = NULL) {
+  force(win_titles)
+  force(ui_list)
+
+  if (!is.null(depend)) {
+    warning(call. = FALSE, "The 'mwsUI' function's 'depend' parameter is no longer used")
+  }
+
+  function(req) {
+    qs <- parseQueryString(req$QUERY_STRING)
+
+    mw_win <- qs$mw_win
+    mw_win <- if (!is.null(mw_win) && length(mw_win) == 1 && grepl("^\\d+$", mw_win, perl = TRUE)) {
+      as.integer(mw_win)
+    } else {
+      NULL
     }
 
-    win_select <- paste0(win_select,
-                         '<h2><a href="?',w,'">',w,'</a></h2>')
-  }
-
-  other_win <- ""
-  if (length(ui_list) > 0){
-    for (u in 1:length(ui_list)){
-      other_win <- paste0(other_win,
-                          '<div class="',win_titles[u],' Window">',ui_list[[u]],'</div>')
+    if (is.null(mw_win)) {
+      mswSelectorPage(win_titles)
+    } else if (mw_win %in% seq_along(ui_list)) {
+      mswPage(ui_list[[mw_win]])
+    } else {
+      NULL
     }
   }
+}
 
-  # check if there is a html tag -- stop
-  if (grepl("</html>", other_win, fixed= T)[1]){
-    stop("The <html> tag is reserved for the main page. Please remove any occurences of the <html> tag in your UIs.")
-  }
+mswSelectorPage <- function(win_titles) {
+  win_select <- lapply(seq_along(win_titles), function(i) {
+    win_title <- win_titles[[i]]
+    tags$h2(
+      tags$a(href = paste0("?mw_win=", i),
+        win_title
+      )
+    )
+  })
 
-  # check if there is a body tag -- change to div, with a warning
-  if (grepl("</body>", other_win, fixed= T)[1]){
-    warning("The <body> tag is reserved for the main page. All <body> tags will be changed to <div>.")
-    # change all body tags to div
-    other_win <- gsub("body","div",other_win)
-  }
+  shiny::bootstrapPage(
+    shiny::div(class = "Window",
+      shiny::div(
+        style = htmltools::css(
+          position = "absolute", top = "50%", left = "50%",
+          margin_right = "-50%", transform = "translate(-50%, -50%)"),
+        win_select
+      )
+    )
+  )
+}
 
-  # get dependencies
-  head_add <- list()
-  if (length(depend) > 0){
-    for (d in names(depend)){
-      if (is.na(depend[[d]])[1]){
-        # if there's nothing there, we infer that you want all js and css files imported for dependency
-        js_files <- list.files(path=system.file(package = d, mustWork = T),pattern = "\\.js$", recursive = T)
-        css_files <- list.files(path=system.file(package = d, mustWork = T),pattern = "\\.css$", recursive = T)
-        head_add[[length(head_add)+1]] <- htmltools::htmlDependency(name = d, version = packageVersion(d),
-                                                                    package = d,
-                                                                    src = "",
-                                                                    script = js_files,
-                                                                    stylesheet = css_files
-        )
-      } else {
-        # we add the specified files one by one to the head
-        for (s in depend[[d]]){
-          if (endsWith(s, ".js")){
-            head_add[[length(head_add)+1]] <- tags$head(shiny::includeScript(system.file(s, package = d, mustWork = T)))
-          } else if (endsWith(s, ".css")){
-            head_add[[length(head_add)+1]] <- tags$head(shiny::includeCSS(system.file(s, package = d, mustWork = T)))
-          }
-        }
-
-      }
-    }
-  }
-
-  ui <- shiny::shinyUI(shiny::bootstrapPage(
-    head_add,
-    shiny::HTML('<script type="text/javascript">
-                $(function() {
-                $("div.Window").hide();
-                var tokens = window.location.href.split("?");
-                if (tokens.length > 1) {
-                var shown_window = tokens[1];
-                $("div."+shown_window).show();
-                } else {
-                $("div.WindowSelector").show();
-                }
-                });
-                </script>'),
-    shiny::div(class="WindowSelector Window",
-               shiny::HTML(win_select),
-               style='position: absolute;
-               top: 50%; left: 50%;
-               margin-right: -50%;
-               transform: translate(-50%, -50%)'
-    ),
-    shiny::HTML(other_win)
-    ))
-
-  return(ui)
+mswPage <- function(ui) {
+  shiny::bootstrapPage(ui)
 }
