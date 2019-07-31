@@ -1,8 +1,8 @@
 Package: mwshiny
 Type: Package
 Title: 'Shiny' for Multiple Windows
-Version: 1.1.0
-Date: 2019-06-09
+Version: 2.0.0
+Date: 2019-07-31
 Authors@R: c(
   person("Hannah", "De los Santos", email = "delosh@rpi.edu", role = c("aut","cre")),
   person("John", "Erickson", role = c("aut")),
@@ -17,8 +17,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends:
-  shiny (>= 1.2.0),
-  htmltools (>= 0.3.6)
+  shiny (>= 1.2.0)
 Suggests: 
     knitr,
     rmarkdown,

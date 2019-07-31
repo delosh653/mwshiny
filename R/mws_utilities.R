@@ -27,11 +27,12 @@ serverFunct <- function(serverValues, session, output, serv_out_list){
 
 #' Renders user interface for all mwshiny windows.
 #'
-#' @param win_titles vector of uniquely named strings, corresponding to window titles. Must be same length as ui_win, and titles must be same index as corresponding ui page in ui_win. No windows can be named 'WindowSelector', and titles cannot have spaces.
-#' @param ui_list list of shiny ui pages. Must be same length as win_titles, and ui page must be same index as corresponding title in win_titles.
-#' @param depend named list of package dependencies, with the names corresponding to the packages for which .js and .css files will be imported. If value is NA, all .js and .css files will be imported. Otherwise, value must be a vector of strings corresponding to the .js and .css files to be imported, with location relative to the package folder.
+#' @param ui_list named list of shiny UI pages. The name of each entry in the UI page list corresponds to its window title. No windows can be named 'WindowSelector', titles must be uniquely named, and titles cannot have spaces.
 #' @return ui: user interfaces for all windows
-mwsUI <- function(win_titles, ui_list, depend) {
+mwsUI <- function(ui_list) {
+
+  # window titles
+  win_titles <- names(ui_list)
   win_select <- ""
   for (w in win_titles){
     # check if titles have spaces
@@ -43,11 +44,10 @@ mwsUI <- function(win_titles, ui_list, depend) {
                          '<h2><a href="?',w,'">',w,'</a></h2>')
   }
 
-  other_win <- ""
+  other_win <- list()
   if (length(ui_list) > 0){
     for (u in 1:length(ui_list)){
-      other_win <- paste0(other_win,
-                          '<div class="',win_titles[u],' Window">',ui_list[[u]],'</div>')
+      other_win[[length(other_win)+1]] <- tags$div(ui_list[[u]], class = paste0(win_titles[u], " Window"))
     }
   }
 
@@ -56,43 +56,12 @@ mwsUI <- function(win_titles, ui_list, depend) {
     stop("The <html> tag is reserved for the main page. Please remove any occurences of the <html> tag in your UIs.")
   }
 
-  # check if there is a body tag -- change to div, with a warning
+  # check if there is a body tag -- suggest change to div with a warning
   if (grepl("</body>", other_win, fixed= T)[1]){
-    warning("The <body> tag is reserved for the main page. All <body> tags will be changed to <div>.")
-    # change all body tags to div
-    other_win <- gsub("body","div",other_win)
-  }
-
-  # get dependencies
-  head_add <- list()
-  if (length(depend) > 0){
-    for (d in names(depend)){
-      if (is.na(depend[[d]])[1]){
-        # if there's nothing there, we infer that you want all js and css files imported for dependency
-        js_files <- list.files(path=system.file(package = d, mustWork = T),pattern = "\\.js$", recursive = T)
-        css_files <- list.files(path=system.file(package = d, mustWork = T),pattern = "\\.css$", recursive = T)
-        head_add[[length(head_add)+1]] <- htmltools::htmlDependency(name = d, version = packageVersion(d),
-                                                                    package = d,
-                                                                    src = "",
-                                                                    script = js_files,
-                                                                    stylesheet = css_files
-        )
-      } else {
-        # we add the specified files one by one to the head
-        for (s in depend[[d]]){
-          if (endsWith(s, ".js")){
-            head_add[[length(head_add)+1]] <- tags$head(shiny::includeScript(system.file(s, package = d, mustWork = T)))
-          } else if (endsWith(s, ".css")){
-            head_add[[length(head_add)+1]] <- tags$head(shiny::includeCSS(system.file(s, package = d, mustWork = T)))
-          }
-        }
-
-      }
-    }
+    warning("The <body> tag is reserved for the main page. We suggest you change your <body> tags to <div> tags in your UIs, as errors may occur.")
   }
 
   ui <- shiny::shinyUI(shiny::bootstrapPage(
-    head_add,
     shiny::HTML('<script type="text/javascript">
                 $(function() {
                 $("div.Window").hide();
@@ -112,7 +81,7 @@ mwsUI <- function(win_titles, ui_list, depend) {
                margin-right: -50%;
                transform: translate(-50%, -50%)'
     ),
-    shiny::HTML(other_win)
+    other_win
     ))
 
   return(ui)
