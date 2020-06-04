@@ -32,6 +32,7 @@ serverFunct <- function(serverValues, session, output, serv_out_list){
 #' @param depend deprecated; previously was a way to declare HTML dependencies, but now they are inferred from elements of \code{ui_list}.
 #' @return ui: user interfaces for all windows
 mwsUI <- function(win_titles, ui_list, depend = NULL) {
+  # force evaluation of the titles and the list, so that they can be used
   force(win_titles)
   force(ui_list)
 
@@ -39,48 +40,68 @@ mwsUI <- function(win_titles, ui_list, depend = NULL) {
     warning(call. = FALSE, "The 'mwsUI' function's 'depend' parameter is no longer used")
   }
 
+  # return function to create UI pages
   function(req) {
+    # get the window information
     qs <- parseQueryString(req$QUERY_STRING)
 
-    mw_win <- qs$mw_win
-    mw_win <- if (!is.null(mw_win) && length(mw_win) == 1 && grepl("^\\d+$", mw_win, perl = TRUE)) {
-      as.integer(mw_win)
+    qs <- req$QUERY_STRING
+    # take the selected window
+    mw_win <- substr(qs, 2, nchar(qs))
+
+    mw_win <- if (!is.null(mw_win) && nchar(mw_win) > 0) {
+      # return a user selected window
+      mw_win
     } else {
+      # otherwise, show the "windowselector" window
       NULL
     }
 
     if (is.null(mw_win)) {
-      mswSelectorPage(win_titles)
-    } else if (mw_win %in% seq_along(ui_list)) {
-      mswPage(ui_list[[mw_win]])
+      # show the window selector window
+      mwsSelectorPage(win_titles)
+    } else if (mw_win %in% names(ui_list)) {
+      mwsPage(ui_list[[mw_win]])
     } else {
       NULL
     }
   }
 }
 
-mswSelectorPage <- function(win_titles) {
+#' Creates the "Window Selector" page.
+#'
+#' @param win_titles vector of uniquely named strings, corresponding to window titles. Must be same length as ui_win, and titles must be same index as corresponding ui page in ui_win. No windows can be named 'WindowSelector', and titles cannot have spaces.
+#' @return user interface for window selector page
+mwsSelectorPage <- function(win_titles) {
+  #  get each of the windows to select
   win_select <- lapply(seq_along(win_titles), function(i) {
+    # get each of the titles
     win_title <- win_titles[[i]]
+    # create a link for each window
     tags$h2(
-      tags$a(href = paste0("?mw_win=", i),
-        win_title
+      tags$a(href = paste0("?",win_title),
+             win_title
       )
     )
   })
 
+  # create and return the window selector page
   shiny::bootstrapPage(
     shiny::div(class = "Window",
-      shiny::div(
-        style = htmltools::css(
-          position = "absolute", top = "50%", left = "50%",
-          margin_right = "-50%", transform = "translate(-50%, -50%)"),
-        win_select
-      )
+               shiny::div(
+                 style = htmltools::css(
+                   position = "absolute", top = "50%", left = "50%",
+                   margin_right = "-50%", transform = "translate(-50%, -50%)"),
+                 win_select
+               )
     )
   )
 }
 
-mswPage <- function(ui) {
+#' Creates a selected multiwindow shiny page.
+#'
+#' @param ui a selection from ui_list, the list of shiny ui pages.
+#' @return user interface for the selected multi-window page
+mwsPage <- function(ui) {
   shiny::bootstrapPage(ui)
 }
