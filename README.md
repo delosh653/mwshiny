@@ -29,5 +29,4 @@ Further examples were developed for useR! 2019 in Toulouse, and can be found in 
 ## Contact
 
 Hannah De los Santos /
-email: delosh@rpi.edu /
-Rensselaer Polytechnic Institute
+email: hdelossantos653@gmail.com 
