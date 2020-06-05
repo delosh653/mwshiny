@@ -27,62 +27,84 @@ serverFunct <- function(serverValues, session, output, serv_out_list){
 
 #' Renders user interface for all mwshiny windows.
 #'
-#' @param ui_list named list of shiny UI pages. The name of each entry in the UI page list corresponds to its window title. No windows can be named 'WindowSelector', titles must be uniquely named, and titles cannot have spaces.
+
+#' @param win_titles vector of uniquely named strings, corresponding to window titles. Must be same length as ui_win, and titles must be same index as corresponding ui page in ui_win. No windows can be named 'WindowSelector', and titles cannot have spaces.
+#' @param ui_list list of shiny ui pages. Must be same length as win_titles, and ui page must be same index as corresponding title in win_titles.
+#' @param depend deprecated; previously was a way to declare HTML dependencies, but now they are inferred from elements of \code{ui_list}.
 #' @return ui: user interfaces for all windows
-mwsUI <- function(ui_list) {
+mwsUI <- function(win_titles, ui_list, depend = NULL) {
+  # force evaluation of the titles and the list, so that they can be used
+  force(win_titles)
+  force(ui_list)
 
-  # window titles
-  win_titles <- names(ui_list)
-  win_select <- ""
-  for (w in win_titles){
-    # check if titles have spaces
-    if (grepl(" ", w)){
-      stop(paste("Window titles cannot have spaces. Please remove space in window title:", w))
+
+  if (!is.null(depend)) {
+    warning(call. = FALSE, "The 'mwsUI' function's 'depend' parameter is no longer used")
+  }
+
+
+  # return function to create UI pages
+  function(req) {
+    # get the window information
+    qs <- parseQueryString(req$QUERY_STRING)
+    
+    qs <- req$QUERY_STRING
+    # take the selected window
+    mw_win <- substr(qs, 2, nchar(qs))
+
+    mw_win <- if (!is.null(mw_win) && nchar(mw_win) > 0) {
+      # return a user selected window
+      mw_win
+    } else {
+      # otherwise, show the "windowselector" window
+      NULL
     }
 
-    win_select <- paste0(win_select,
-                         '<h2><a href="?',w,'">',w,'</a></h2>')
-  }
-
-  other_win <- list()
-  if (length(ui_list) > 0){
-    for (u in 1:length(ui_list)){
-      other_win[[length(other_win)+1]] <- tags$div(ui_list[[u]], class = paste0(win_titles[u], " Window"))
+    if (is.null(mw_win)) {
+      # show the window selector window
+      mwsSelectorPage(win_titles)
+    } else if (mw_win %in% names(ui_list)) {
+      mwsPage(ui_list[[mw_win]])
+    } else {
+      NULL
     }
   }
+}
 
-  # check if there is a html tag -- stop
-  if (grepl("</html>", other_win, fixed= T)[1]){
-    stop("The <html> tag is reserved for the main page. Please remove any occurences of the <html> tag in your UIs.")
-  }
+#' Creates the "Window Selector" page.
+#'
+#' @param win_titles vector of uniquely named strings, corresponding to window titles. Must be same length as ui_win, and titles must be same index as corresponding ui page in ui_win. No windows can be named 'WindowSelector', and titles cannot have spaces.
+#' @return user interface for window selector page
+mwsSelectorPage <- function(win_titles) {
+  #  get each of the windows to select
+  win_select <- lapply(seq_along(win_titles), function(i) {
+    # get each of the titles
+    win_title <- win_titles[[i]]
+    # create a link for each window
+    tags$h2(
+      tags$a(href = paste0("?",win_title),
+             win_title
+      )
+    )
+  })
 
-  # check if there is a body tag -- suggest change to div with a warning
-  if (grepl("</body>", other_win, fixed= T)[1]){
-    warning("The <body> tag is reserved for the main page. We suggest you change your <body> tags to <div> tags in your UIs, as errors may occur.")
-  }
+  # create and return the window selector page
+  shiny::bootstrapPage(
+    shiny::div(class = "Window",
+               shiny::div(
+                 style = htmltools::css(
+                   position = "absolute", top = "50%", left = "50%",
+                   margin_right = "-50%", transform = "translate(-50%, -50%)"),
+                 win_select
+               )
+    )
+  )
+}
 
-  ui <- shiny::shinyUI(shiny::bootstrapPage(
-    shiny::HTML('<script type="text/javascript">
-                $(function() {
-                $("div.Window").hide();
-                var tokens = window.location.href.split("?");
-                if (tokens.length > 1) {
-                var shown_window = tokens[1];
-                $("div."+shown_window).show();
-                } else {
-                $("div.WindowSelector").show();
-                }
-                });
-                </script>'),
-    shiny::div(class="WindowSelector Window",
-               shiny::HTML(win_select),
-               style='position: absolute;
-               top: 50%; left: 50%;
-               margin-right: -50%;
-               transform: translate(-50%, -50%)'
-    ),
-    other_win
-    ))
-
-  return(ui)
+#' Creates a selected multiwindow shiny page.
+#'
+#' @param ui a selection from ui_list, the list of shiny ui pages.
+#' @return user interface for the selected multi-window page
+mwsPage <- function(ui) {
+  shiny::bootstrapPage(ui)
 }

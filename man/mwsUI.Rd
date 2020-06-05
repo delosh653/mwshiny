@@ -4,10 +4,14 @@
 \alias{mwsUI}
 \title{Renders user interface for all mwshiny windows.}
 \usage{
-mwsUI(ui_list)
+mwsUI(win_titles, ui_list, depend = NULL)
 }
 \arguments{
-\item{ui_list}{named list of shiny UI pages. The name of each entry in the UI page list corresponds to its window title. No windows can be named 'WindowSelector', titles must be uniquely named, and titles cannot have spaces.}
+\item{win_titles}{vector of uniquely named strings, corresponding to window titles. Must be same length as ui_win, and titles must be same index as corresponding ui page in ui_win. No windows can be named 'WindowSelector', and titles cannot have spaces.}
+
+\item{ui_list}{list of shiny ui pages. Must be same length as win_titles, and ui page must be same index as corresponding title in win_titles.}
+
+\item{depend}{deprecated; previously was a way to declare HTML dependencies, but now they are inferred from elements of \code{ui_list}.}
 }
 \value{
 ui: user interfaces for all windows

@@ -31,6 +31,10 @@ mwsApp <- function(ui_win=list(), serv_calc=list(), serv_out=list()){
     stop("Argument win_titles contains duplicate window titles.")
   }
 
+  if (any(grepl(" ", win_titles, fixed = T))){
+    stop(paste("Window titles cannot have spaces. Please remove all spaces in window title."))
+  }
+
   if (typeof(ui_win)!="list"){
     stop("Argument ui_win is not a list")
   }
@@ -52,14 +56,16 @@ mwsApp <- function(ui_win=list(), serv_calc=list(), serv_out=list()){
   }
 
   # compute ui
-  ui <- mwsUI(ui_win)
+
+  ui <- mwsUI(names(ui_win),ui_win)
+
 
   # preallocate serverValues
   serverValues <- shiny::reactiveValues()
 
 
   # create server, getting output
-  mws_server <- shiny::shinyServer(function(input,output,session){
+  mws_server <- (function(input,output,session){ #shiny::shinyServer
     observe({
       for (inputId in names(input)) {
         serverValues[[inputId]] <- input[[inputId]]
