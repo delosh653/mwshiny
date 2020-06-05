@@ -9,3 +9,4 @@ This is a version update (2.1.0). In this version, I have:
 - added a contributor (Joe Cheng), who drove these changes
 - modified approach to serving UI, to be more consistent with shiny approach
 - removed public documentation for the internal functions
+- updated the maintainer email

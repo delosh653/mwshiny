@@ -2,9 +2,9 @@ Package: mwshiny
 Type: Package
 Title: 'Shiny' for Multiple Windows
 Version: 2.1.0
-Date: 2019-07-31
+Date: 2020-06-05
 Authors@R: c(
-  person("Hannah", "De los Santos", email = "delosh@rpi.edu", role = c("aut","cre")),
+  person("Hannah", "De los Santos", email = "hdelossantos653@gmail.com", role = c("aut","cre")),
   person("John", "Erickson", role = c("aut")),
   person("Joe","Cheng",role = c("ctb")),
   person("Nicholas", "Thomson", role = c("ctb")),
