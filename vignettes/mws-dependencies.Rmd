@@ -1,5 +1,5 @@
 ---
-title: 'Specifying Package JS and CSS Dependencies with mwshiny'
+title: 'Specifying Package JS and CSS Dependencies with mwshiny v1.0.0/v1.1.0'
 author: "Hannah De los Santos"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -29,6 +29,8 @@ knitr::opts_chunk$set(
   results = "hold"
 )
 ```
+
+**Note that this vignette only applies to mwshiny v1.1.0/v1.1.0. In newer versions of mwshiny, dependencies are automatically imported. It is strongly recommended to use mwshiny v2.0.0 and above.**
 
 The *mwshiny* package provides a simple function, mwsApp(), which allows you to create Shiny apps that span multiple windows. While it works with any package, some packages have dependencies on various .js and .css files, which are not automatically imported when creating a Multi-Window Shiny app. Thus, mwsApp() allows you to specify specific dependencies in various packages that your app uses. This vignette shows you how to do this, finding the files your packages need and specifying them directly. I'll assume basic knowledge of Shiny and mwshiny throughout this vignette.
 

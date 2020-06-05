@@ -56,7 +56,9 @@ mwsApp <- function(ui_win=list(), serv_calc=list(), serv_out=list()){
   }
 
   # compute ui
+
   ui <- mwsUI(names(ui_win),ui_win)
+
 
   # preallocate serverValues
   serverValues <- shiny::reactiveValues()

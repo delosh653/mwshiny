@@ -27,6 +27,7 @@ serverFunct <- function(serverValues, session, output, serv_out_list){
 
 #' Renders user interface for all mwshiny windows.
 #'
+
 #' @param win_titles vector of uniquely named strings, corresponding to window titles. Must be same length as ui_win, and titles must be same index as corresponding ui page in ui_win. No windows can be named 'WindowSelector', and titles cannot have spaces.
 #' @param ui_list list of shiny ui pages. Must be same length as win_titles, and ui page must be same index as corresponding title in win_titles.
 #' @param depend deprecated; previously was a way to declare HTML dependencies, but now they are inferred from elements of \code{ui_list}.
@@ -36,15 +37,17 @@ mwsUI <- function(win_titles, ui_list, depend = NULL) {
   force(win_titles)
   force(ui_list)
 
+
   if (!is.null(depend)) {
     warning(call. = FALSE, "The 'mwsUI' function's 'depend' parameter is no longer used")
   }
+
 
   # return function to create UI pages
   function(req) {
     # get the window information
     qs <- parseQueryString(req$QUERY_STRING)
-
+    
     qs <- req$QUERY_STRING
     # take the selected window
     mw_win <- substr(qs, 2, nchar(qs))

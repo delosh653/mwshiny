@@ -1,0 +1,13 @@
+## Test environments
+* local Windows 10 install, R 3.5.1/3.6
+
+## R CMD check results
+There were no ERRORs, WARNINGs, or NOTEs.
+
+## Resubmission
+This is a version update (2.0.0). In this version, I have:
+- condensed win_titles and ui_win such that the named list ui_win now contains window titles
+- fixed necessity for stated dependencies and have therefore removed the argument from mwsApp()
+- updated vignettes accordingly
+- added link to mwshiny-example GitHub repo to one vignette
+- removed the htmltools dependency, as it's no longer needed

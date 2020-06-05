@@ -60,13 +60,11 @@ summary(iris) # just to get a look at what we're dealing with here
 Now that I've loaded my data and packages, I need to set up what my windows are going to look like. For this mwshiny app, I'm going to have one window be my "controller", where I change all my inputs, and the other one be a window where my output is going to be. My output is going to be scatter plots of the data, colored by species.
 
 ```{r ui}
-# vector of strings that are the names of my windows
-win_titles <- c("Controller","Scatter")
-
+# named list of ui pages that are the contain the title and content of each of my windows
 ui_win <- list()
 
 # first we add what we want to see in the controller to the list
-ui_win[[1]] <- fluidPage(
+ui_win[["Controller"]] <- fluidPage(
   titlePanel("Iris Dataset Explorer: Controller"),
   sidebarLayout(
     sidebarPanel(
@@ -93,14 +91,14 @@ ui_win[[1]] <- fluidPage(
 )
 
 # then we add what we want to see in the scatter section
-ui_win[[2]] <- fluidPage(
+ui_win[["Scatter"]] <- fluidPage(
   titlePanel("Iris Dataset Explorer: Scatter"),
   plotOutput(outputId = "iris_scatter")
 )
 
 ```
 
-Note that win_titles and ui_win are the same length. Also, the UI that I want to see in each window matches up to their title (i.e., the UI I want for the controller window is first, then the scatter UI is second in the list). Further, window titles cannot contain spaces or have any duplicates.
+Note that each of ui_win's names correspond to what I want the name of my window to be (i.e., the UI I want for the controller window is first, then the scatter UI is second in the list). Further, window titles cannot contain spaces or have any duplicates.
 
 ## Set Up the Calculations
 
@@ -163,11 +161,13 @@ serv_out[["iris_scatter"]] <- function(calc, sess){
 
 ## Run Multi-Window Shiny App!
 
-Now that we have all our pieces, we can just plug these in and run our app! Note that we have no heavy .js or .css dependencies in the packages we're using (ggplot2 and datasets). However, other packages, such as shinyDashboard and visNetwork, lean heavily on .js and .css dependencies. Even in this case, Shiny has some aesthetic scripts that we may want to specify, though they don't influence our run. For more information and an example using visNetwork to find and specify dependencies, please look at our other vignette "Specifying Package JS and CSS Dependencies with mwshiny".
+Now that we have all our pieces, we can just plug these in and run our app! 
+
+If you are using an older version of mwshiny (v1.1.0 or v1.1.0), JS/CSS dependencies may be required, as well as different syntax. For more information on this previous version and an example using visNetwork to find and specify dependencies, please look at our other vignette "Specifying Package JS and CSS Dependencies with mwshiny v1.0.0/v1.1.0".
 
 ```{r mwsapp, eval=F}
 #run!
-mwsApp(win_titles, ui_win, serv_calc, serv_out, depend = list())
+mwsApp(ui_win, serv_calc, serv_out)
 ```
 
 Note that multi-windowed apps work better when run in an external browser. Since I can't show a multi-window Shiny app in a vignette form, here are some images of the final result.
@@ -191,3 +191,13 @@ knitr::include_graphics(c("figures/controller_edit.png", "figures/scatter_edit.p
 ```
 
 It's as simple as that! Now that you know make a multi-window Shiny app, feel free to make some of your own!
+
+## Further Examples
+
+To present this work at useR! 2019, I created a repository of some additional multi-window shiny apps, which you can find [here](https://github.com/delosh653/mwshiny-examples). The examples demonstrate the following:
+
+1. Multiple Monitors at a Workstation (Population Dynamics): folder "pop"
+2. Controller Driving External Monitor (Cultural Exploration through Art): folder "art"
+3. Alternative Visualization Structures through the Rensselaer Campfire (Circadian Rhythm Functionality): folder "health"
+
+Hopefully these help a little as well. Enjoy your multi-window shiny apps!
