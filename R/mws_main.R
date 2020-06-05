@@ -32,7 +32,7 @@ mwsApp <- function(ui_win=list(), serv_calc=list(), serv_out=list()){
   }
 
   if (any(grepl(" ", win_titles, fixed = T))){
-    stop(paste("Window titles cannot have spaces. Please remove all spaces in window title."))
+    stop(paste("Window titles cannot have spaces. Please remove all spaces in window titles."))
   }
 
   if (typeof(ui_win)!="list"){
@@ -52,13 +52,11 @@ mwsApp <- function(ui_win=list(), serv_calc=list(), serv_out=list()){
   }
 
   if (is.null(names(ui_win)) & length(ui_win) > 0){
-    stop("Argument depend is unnamed")
+    stop("Argument ui_win is unnamed")
   }
 
   # compute ui
-
   ui <- mwsUI(names(ui_win),ui_win)
-
 
   # preallocate serverValues
   serverValues <- shiny::reactiveValues()

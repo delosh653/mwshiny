@@ -1,0 +1,11 @@
+## Test environments
+* local Windows 10 install, R 3.5.1/3.6
+
+## R CMD check results
+There were no ERRORs, WARNINGs, or NOTEs.
+
+## Resubmission
+This is a version update (2.1.0). In this version, I have:
+- added a contributor (Joe Cheng), who drove these changes
+- modified approach to serving UI, to be more consistent with shiny approach
+- removed public documentation for the internal functions

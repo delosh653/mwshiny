@@ -5,6 +5,8 @@
 #' @param output traditional shiny output
 #' @param serv_out_list a named list of functions that render output. Each function is of the form function(calc, session), where calc is a named list containing the traditional Shiny input and reactive values that have calculated values derived from input, and session is the traditional Shiny server session value. It returns the results of a Shiny render function. The name of each function corresponds to its output label.
 #' @return traditional Shiny output argument
+#' @keywords internal
+#' @noRd
 serverFunct <- function(serverValues, session, output, serv_out_list){
   # go through each output rendering and render
   if (length(serv_out_list) > 0){
@@ -27,27 +29,21 @@ serverFunct <- function(serverValues, session, output, serv_out_list){
 
 #' Renders user interface for all mwshiny windows.
 #'
-
 #' @param win_titles vector of uniquely named strings, corresponding to window titles. Must be same length as ui_win, and titles must be same index as corresponding ui page in ui_win. No windows can be named 'WindowSelector', and titles cannot have spaces.
 #' @param ui_list list of shiny ui pages. Must be same length as win_titles, and ui page must be same index as corresponding title in win_titles.
-#' @param depend deprecated; previously was a way to declare HTML dependencies, but now they are inferred from elements of \code{ui_list}.
 #' @return ui: user interfaces for all windows
-mwsUI <- function(win_titles, ui_list, depend = NULL) {
+#' @keywords internal
+#' @noRd
+mwsUI <- function(win_titles, ui_list) {
   # force evaluation of the titles and the list, so that they can be used
   force(win_titles)
   force(ui_list)
-
-
-  if (!is.null(depend)) {
-    warning(call. = FALSE, "The 'mwsUI' function's 'depend' parameter is no longer used")
-  }
-
 
   # return function to create UI pages
   function(req) {
     # get the window information
     qs <- parseQueryString(req$QUERY_STRING)
-    
+
     qs <- req$QUERY_STRING
     # take the selected window
     mw_win <- substr(qs, 2, nchar(qs))
@@ -75,6 +71,8 @@ mwsUI <- function(win_titles, ui_list, depend = NULL) {
 #'
 #' @param win_titles vector of uniquely named strings, corresponding to window titles. Must be same length as ui_win, and titles must be same index as corresponding ui page in ui_win. No windows can be named 'WindowSelector', and titles cannot have spaces.
 #' @return user interface for window selector page
+#' @keywords internal
+#' @noRd
 mwsSelectorPage <- function(win_titles) {
   #  get each of the windows to select
   win_select <- lapply(seq_along(win_titles), function(i) {
@@ -105,6 +103,8 @@ mwsSelectorPage <- function(win_titles) {
 #'
 #' @param ui a selection from ui_list, the list of shiny ui pages.
 #' @return user interface for the selected multi-window page
+#' @keywords internal
+#' @noRd
 mwsPage <- function(ui) {
   shiny::bootstrapPage(ui)
 }
