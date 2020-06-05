@@ -10,7 +10,7 @@ Authors@R: c(
   person("Nicholas", "Thomson", role = c("ctb")),
   person("Kristin", "Bennett", role = c("aut"))
   )
-Maintainer: Hannah De los Santos <delosh@rpi.edu>
+Maintainer: Hannah De los Santos <hdelossantos653@gmail.com>
 Description: A simple function, mwsApp(), that runs a 'shiny' app spanning multiple,
   connected windows. This uses all standard 'shiny' conventions, and depends only on
   the 'shiny' package.
