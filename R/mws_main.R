@@ -61,10 +61,12 @@ mwsApp <- function(ui_win=list(), serv_calc=list(), serv_out=list()){
   # preallocate serverValues
   serverValues <- shiny::reactiveValues()
 
+  status <- "create"
 
   # create server, getting output
-  mws_server <- (function(input,output,session){ #shiny::shinyServer
-    observe({
+  mws_server <- function(input,output,session){ #shiny::shinyServer
+
+    observeEvent(reactiveValuesToList(input),{
       for (inputId in names(input)) {
         serverValues[[inputId]] <- input[[inputId]]
       }
@@ -76,7 +78,11 @@ mwsApp <- function(ui_win=list(), serv_calc=list(), serv_out=list()){
 
         # check for errors related to numbers of inputs
         tryCatch({
-          serv_calc[[s]](serverValues, session)
+          if (status == "create"){
+            serv_calc[[s]](serverValues, session)
+
+            status <<- "don't create"
+          }
         }, error = function(e){
           if (length(grep("unused argument ", as.character(e)[1], fixed = T))>0 |
               length(grep("is missing, with no default", as.character(e)[1], fixed = T))>0){
@@ -86,11 +92,7 @@ mwsApp <- function(ui_win=list(), serv_calc=list(), serv_out=list()){
         })
       }
     }
-
-    # then allocate each of these to output
-    serverFunct(serverValues, session, output, serv_out)
-
-  })
+  }
 
   # run the app!
   shiny::shinyApp(ui, mws_server)
